@@ -1,6 +1,7 @@
 package com.example.damien.test;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
@@ -30,18 +31,23 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String urlRegister = "http://192.168.12.79:3000/users/create";
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    private ProgressDialog prgDialog;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register_page);
+        prgDialog = new ProgressDialog(this);
+        prgDialog.setMessage("Inscription en cours ... ");
+        prgDialog.setCancelable(false);
 
     }
 
 
 
     public void onSubscribe(View view){
+        prgDialog.show();
         EditText emailET = (EditText) findViewById(R.id.email);
         EditText loginET = (EditText)findViewById(R.id.login);
         EditText passwordET = (EditText)findViewById(R.id.password);
@@ -76,11 +82,13 @@ public class RegisterActivity extends AppCompatActivity {
         client.post(getApplicationContext(), urlRegister, entity, "application/json", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                prgDialog.hide();
                 Toast.makeText(getApplicationContext(),"Enregistrement réussi", Toast.LENGTH_SHORT).show();
                 navigationToHostPage();
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error ) {
+                prgDialog.hide();
                 if(statusCode == 404){
                     Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
                 }

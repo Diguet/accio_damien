@@ -1,6 +1,7 @@
 package com.example.damien.test;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
@@ -32,10 +33,11 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class ReservationActivity extends Activity {
 
-    private static final String urlGetTrajet = "http://192.168.12.79:3000/centrectrl/";
-    private static String urlReservation = "http://192.168.12.79:3000/centrectrl/demande";
+    private static final String urlGetTrajet = "http://192.168.12.79:3000/centerctrl/";
+    private static String urlReservation = "http://192.168.12.79:3000/centerctrl/demande";
     private List<Trip> trips;
     private ArrayList<TripPoint> trip;
+    private ProgressDialog prgDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +45,13 @@ public class ReservationActivity extends Activity {
         setContentView(R.layout.reservation_page);
         TimePicker timePicker = (TimePicker) findViewById(R.id.time_arrival);
         timePicker.setIs24HourView(true);
+        prgDialog = new ProgressDialog(this);
+        prgDialog.setMessage("Recherche de trajets ... ");
+        prgDialog.setCancelable(false);
     }
 
     public void onReservation(View view){
+        prgDialog.show();
         EditText arrivalAddressET = (EditText)findViewById(R.id.arrivalAddress);
         EditText departureAddressET = (EditText)findViewById(R.id.departureAddress);
 
@@ -101,6 +107,7 @@ public class ReservationActivity extends Activity {
         client.post(getApplicationContext(), urlReservation, entity, "application/json",new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                prgDialog.hide();
                 Toast.makeText(getApplicationContext(),"Réservation réussie", Toast.LENGTH_SHORT).show();
                 try {
                     JSONObject jsonObject = new JSONObject(new String(responseBody));
@@ -114,6 +121,7 @@ public class ReservationActivity extends Activity {
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error ) {
+                prgDialog.hide();
                 if(statusCode == 404){
                     Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
                 }
